@@ -1,15 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Task } from '../model/Task';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
 import { TaskService } from '../services/task.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent implements OnInit{
+export class DashboardComponent implements OnInit, OnDestroy{
   showCreateTaskForm: boolean = false;
   http: HttpClient = inject(HttpClient);
   allTasks: Task[] = [];
@@ -22,17 +23,32 @@ export class DashboardComponent implements OnInit{
   isLoading: boolean = false;
 
   errorMessage: string | null = null;
+  errorSub: Subscription;
+
+  showTaskDetails: boolean = false;
 
   private setErrorMessage(err: HttpErrorResponse){
     if(err.error.error === 'Permission denied'){
       this.errorMessage = 'You do not have permission to perform this action.';
+    } else{
+      this.errorMessage = err.message;
     }
     
   }
 
   ngOnInit(): void {
     this.fetchAllTasks();
+    this.errorSub = this.taskService.errorSubject.subscribe({
+      next:(httpError)=>{
+        this.setErrorMessage(httpError);
+      }
+    })
   }
+
+  ngOnDestroy(): void {
+      this.errorSub.unsubscribe();
+  }
+
 
   OpenCreateTaskForm(){
     this.showCreateTaskForm = true;
@@ -103,6 +119,14 @@ export class DashboardComponent implements OnInit{
     this.selectedTask = this.allTasks.find((task) => {
       return task.id === id
     })
+  }
+
+  showCurrentTaskDetails(id){
+    this.showTaskDetails = true
+  }
+
+  CloseTaskDetails(){
+    this.showTaskDetails = false
   }
 
 }

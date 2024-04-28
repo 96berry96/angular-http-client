@@ -6,6 +6,13 @@
         [selectedTask]="selectedTask"
 ></app-create-task>
 
+<app-task-details 
+  (CloseDetailView)="CloseTaskDetails()"
+  *ngIf="showTaskDetails"
+>
+
+</app-task-details>
+
 <div class="dashboard-container">
     <div style="display: flex;">
         <div style="width: 50%">
@@ -35,7 +42,7 @@
           <p><b>Priority: </b>{{task.priority}}</p>
           <p><b>Status: </b>{{task.status}}</p>
           <div class="task-action-icons">
-              <button class="task-action-btn" title="Detail">
+              <button class="task-action-btn" title="Detail" (click)="showCurrentTaskDetails(task.id)">
                   <i class="fa fa-info-circle" aria-hidden="true"></i>
               </button>
               <button class="task-action-btn" title="Edit" (click)="OnEditTaskClicked(task.id)">
