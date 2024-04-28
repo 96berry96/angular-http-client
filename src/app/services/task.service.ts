@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { map, catchError } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse, HttpEventType, HttpHeaders, HttpParams } from '@angular/common/http';
+import { map, catchError, tap } from 'rxjs/operators';
 import { Task } from '../model/Task';
 import { Subject, throwError } from 'rxjs';
 import { LoggingService } from './logging.service';
@@ -36,8 +36,14 @@ export class TaskService {
   }
 
   DeleteAllTask(){
-    this.http.delete('https://angularhttpclient-d8427-default-rtdb.firebaseio.com/tasks.json')
+    this.http.delete('https://angularhttpclient-d8427-default-rtdb.firebaseio.com/tasks.json', {observe: 'events', responseType: 'json'})
       .pipe(
+        tap((event)=>{
+          console.log(event);
+          if(event.type === HttpEventType.Sent){
+
+          }
+        }),
         catchError((err)=>{
           const errorObj = {statusCode: err.status, errorMessage: err.message, datetime: new Date}
           this.loggingService.logError(errorObj);
@@ -55,11 +61,19 @@ export class TaskService {
 
 
   GetAllTasks(){
-    const headers = new HttpHeaders();
-    headers.set('Content-Type', 'application/json');
+    let headers = new HttpHeaders();
+    headers = headers.set('Content-Type', 'application/json');
+    headers = headers.set('Access-Control-Allow-Origin', '*');
+
+    let queryParams: HttpParams = new HttpParams();
+    //queryParams = queryParams.set('page', 2);
+    //queryParams = queryParams.set('item', 10);
     
-    return this.http.get<{[key:string]: Task}>('https://angularhttpclient-d8427-default-rtdb.firebaseio.com/tasks.json')
+    return this.http.get<{[key:string]: Task}>('https://angularhttpclient-d8427-default-rtdb.firebaseio.com/tasks.json', 
+    {headers:headers, params: queryParams, observe:'body'})
       .pipe(map((response)=>{
+        console.log(response);
+        
         let tasks = [];
         for(let key in response){
           if(response.hasOwnProperty(key)){
