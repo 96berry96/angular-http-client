@@ -20,12 +20,16 @@ export class DashboardComponent implements OnInit, OnDestroy{
   selectedTask: Task;
   currentTaskId: string = '';
 
+  //Toas Options
   isLoading: boolean = false;
 
+  //Error subject Options
   errorMessage: string | null = null;
   errorSub: Subscription;
 
+  //TaskDetail options
   showTaskDetails: boolean = false;
+  currentTask: Task | null = null;
 
   private setErrorMessage(err: HttpErrorResponse){
     if(err.error.error === 'Permission denied'){
@@ -121,8 +125,13 @@ export class DashboardComponent implements OnInit, OnDestroy{
     })
   }
 
-  showCurrentTaskDetails(id){
+  showCurrentTaskDetails(id: string | undefined){
     this.showTaskDetails = true
+    this.taskService.getTaskDetails(id).subscribe({
+      next: (data: Task)=>{
+        this.currentTask = data;
+      }
+    })
   }
 
   CloseTaskDetails(){

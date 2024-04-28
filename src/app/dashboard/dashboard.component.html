@@ -8,6 +8,7 @@
 
 <app-task-details 
   (CloseDetailView)="CloseTaskDetails()"
+  [currentTask]="currentTask"
   *ngIf="showTaskDetails"
 >
 

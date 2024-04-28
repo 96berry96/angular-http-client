@@ -51,8 +51,13 @@ export class TaskService {
       })
   }
 
+  
+
 
   GetAllTasks(){
+    const headers = new HttpHeaders();
+    headers.set('Content-Type', 'application/json');
+    
     return this.http.get<{[key:string]: Task}>('https://angularhttpclient-d8427-default-rtdb.firebaseio.com/tasks.json')
       .pipe(map((response)=>{
         let tasks = [];
@@ -69,6 +74,15 @@ export class TaskService {
         this.loggingService.logError(errorObj);
         return throwError(()=>err)
       }))
+  }
+
+  getTaskDetails(id: string | undefined){
+    return this.http.get('https://angularhttpclient-d8427-default-rtdb.firebaseio.com/tasks/'+id+'.json')
+      .pipe(map((response)=>{
+        let task = {};
+        task = {...response, id:id};
+        return task;
+      }))   
   }
 
   UpdateTask(id: string | undefined, data: Task){
